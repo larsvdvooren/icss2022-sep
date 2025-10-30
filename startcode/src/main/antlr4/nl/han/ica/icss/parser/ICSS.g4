@@ -18,7 +18,7 @@ SCALAR: [0-9]+;
 //Color value takes precedence over id idents
 fragment HEX: [0-9a-fA-F];
 COLOR: '#' HEX HEX HEX HEX HEX HEX; //UPPERCASE now also supported // prefer to force UC only, but tests would fail.
-// COLOR: '#'[0-9A-F]{6} // like this
+// fragment HEX: [0-9A-Fa-f]; // like this
 
 //////////////////////////////////
 // Strengthened ruleset for IDENTs:
