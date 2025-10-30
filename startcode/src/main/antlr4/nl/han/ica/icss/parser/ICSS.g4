@@ -16,27 +16,27 @@ PERCENTAGE: [0-9]+ '%';
 SCALAR: [0-9]+;
 
 //Color value takes precedence over id idents
-COLOR: '#' [0-9a-fA-F]{6}; //UPPERCASE now also supported // prefer to force UC only, but tests would fail.
+fragment HEX: [0-9a-fA-F];
+COLOR: '#' HEX HEX HEX HEX HEX HEX; //UPPERCASE now also supported // prefer to force UC only, but tests would fail.
 // COLOR: '#'[0-9A-F]{6} // like this
 
 //////////////////////////////////
 // Strengthened ruleset for IDENTs:
 // IDENT's must start with a lower case letter (after the '.' or '#')
-//  may include digits and have parts separated by hyphens
+// may include digits and have parts separated by hyphens
 // Trailing hyphens are forbidden, hyphens themselves must be separated by at least one letter/digit
 // eg: .hamburger-menu, .b0x, .a44255325
 
 //Specific identifiers for id's and css classes
 fragment IDENT_START: [a-z];
 fragment IDENT_PART: [a-z0-9];
-fragment IDENT_BODY: IDENT_PART ( '-' IDENT_PART)*;
 
-ID_IDENT: '#' IDENT_START IDENT_BODY; //edited to ensure the ID starts with a lower case letter and only contains lower case letters, numbers and hyphens
-CLASS_IDENT: '.' IDENT_START IDENT_BODY; // dito #0132
+ID_IDENT: '#' IDENT_START IDENT_PART* ( '-'+ IDENT_PART+ )*; //edited to ensure the ID starts with a lower case letter and only contains lower case letters, numbers and hyphens
+CLASS_IDENT: '.' IDENT_START IDENT_PART* ( '-'+ IDENT_PART+ )*; // dito #0132
 
 
 //General identifiers
-LOWER_IDENT: [a-z] [a-z0-9\-]*;
+LOWER_IDENT: [a-z] [a-z0-9-]*;
 CAPITAL_IDENT: [A-Z] [A-Za-z0-9_]*;
 
 //All whitespace is skipped
@@ -52,8 +52,6 @@ MIN: '-';
 MUL: '*';
 ASSIGNMENT_OPERATOR: ':=';
 
-// lets not.
-// INVALID: . { throw new RuntimeException("Invalid character: " + getText()); }; // You said catch whatever you can in the LEXER
 // TODO: Lighter version that allows the LEXER to continue BUT reports the error.
 
 
