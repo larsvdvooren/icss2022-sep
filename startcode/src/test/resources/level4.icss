@@ -1,0 +1,61 @@
+// this is a comment
+BaseWidth := 200px;
+BaseHeight := 100px;
+Divisor := 2;
+UseCustom := TRUE;
+PrimaryColor := #336699;
+
+/*
+this
+is
+also
+a
+comment
+  */
+
+header {
+    background-color: PrimaryColor;
+    width: BaseWidth * 5;  // 1000px
+    height: BaseHeight / Divisor;  // 50px using division
+}
+
+
+/* one line with multiline comment annotation */
+
+#content {
+    // Calculate content dimensions
+    ContentWidth := BaseWidth * 4;  // 800px
+    ContentPadding := 40px;
+
+    width: ContentWidth + ContentPadding / Divisor;  // 800px + 20px = 820px
+    height: BaseHeight * 6 / Divisor + 50px;  // 300px + 50px = 350px
+    background-color: #ffffff;
+}
+
+//several
+// lines
+// of
+// comments
+
+// // double comments
+
+/*
+// nested comment
+*/
+
+.button {
+    ButtonWidth := BaseWidth / Divisor + 50px;  // 150px
+    ButtonHeight := BaseHeight / 2;  // 50px
+
+    width: ButtonWidth;
+    height: ButtonHeight;
+
+    if[UseCustom] {
+        background-color: PrimaryColor;
+        color: #ffffff;
+    }
+    else {
+        background-color: #cccccc;
+        color: #000000;
+    }
+}

@@ -118,7 +118,7 @@ public class HANLinkedList<T> implements IHANLinkedList<T> {
     }
 
 
-    // Traverses the list to count the number of nodes, minus the head node
+    // Traverses the list to count the number of nodes
     @Override
     public int getSize() {
         int size = 0;
@@ -128,8 +128,7 @@ public class HANLinkedList<T> implements IHANLinkedList<T> {
             size++;
             current = current.getNext();
         }
-        // subtract 1 for the head node
-        size--;
+        // oops.
         return size;
     }
 }

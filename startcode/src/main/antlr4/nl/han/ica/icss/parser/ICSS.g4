@@ -39,10 +39,14 @@ CLASS_IDENT: '.' IDENT_START IDENT_PART* ( '-'+ IDENT_PART+ )*; // dito #0132
 LOWER_IDENT: [a-z] [a-z0-9-]*;
 CAPITAL_IDENT: [A-Z] [A-Za-z0-9_]*;
 
+//Comments are skipped
+LINE_COMMENT: '//' ~[\r\n]* -> skip;
+BLOCK_COMMENT: '/*' .*? '*/' -> skip;
+
 //All whitespace is skipped
 WS: [ \t\r\n]+ -> skip;
 
-//
+//Operators
 OPEN_BRACE: '{';
 CLOSE_BRACE: '}';
 SEMICOLON: ';';
@@ -50,6 +54,7 @@ COLON: ':';
 PLUS: '+';
 MIN: '-';
 MUL: '*';
+DIV: '/';
 ASSIGNMENT_OPERATOR: ':=';
 
 // TODO: Lighter version that allows the LEXER to continue BUT reports the error.
@@ -94,6 +99,10 @@ idSelector: ID_IDENT;
 // eg: .pumpkin-pie-12
 classSelector: CLASS_IDENT;
 
+// A propertyName is a lower case identifier
+// eg: background-color
+propertyName: LOWER_IDENT;
+
 // A declaration defines a property (lower case) and assigns an expression as its value, separated by a ':' and ends with a semicolon
 // eg: width: 30%
 declaration: LOWER_IDENT COLON expression SEMICOLON;
@@ -101,23 +110,49 @@ declaration: LOWER_IDENT COLON expression SEMICOLON;
 // A variableAssignment starts with a capitalized identifier and assigns an expression as its value, separated by ':=' and ends with a semicolon
 // eg: WidthVar := 50px
 variableAssignment: CAPITAL_IDENT ASSIGNMENT_OPERATOR expression SEMICOLON;
+// Addition and Subtraction, low precedence
+expression:
+      expression PLUS multiplicativeExpression #AddExpression
+      // Example: 10px + 20px
+      // addition happens after evaluating the multiplicative expressions.
 
-// an expression consists of one or more multiplicativeExpressions that it can add or subtract from one another
-// eg: 20px * 3 - 20px * 2
-expression: multiplicativeExpression ( (PLUS | MIN) multiplicativeExpression )* #AdditiveExpression;
+    | expression MIN multiplicativeExpression #SubtractExpression
+      // Example: 30px - 10px
+      // subtraction happens after evaluating the multiplicative expressions.
 
-//  A multiplicativeExpression consists of one or more primaryExpressions that it can multiply with one another
-// eg 3px * 4
-multiplicativeExpression: primaryExpression ( MUL primaryExpression )* #MultiplicativeExpr; // ANTLR dislikes the reusal of the samen names, no matter case
+    | multiplicativeExpression #PassthroughExpression
+      // Example: 5px
+      // directly pass through a multiplicative expression without addition or subtraction allowing these expressions to exist on their own.
+     ;
 
-// A primaryExpression can be:
-// A literal
-// eg: 20px
-// A reference to a variable
-// eg: WidthVar
-// An expression within parentheses
-// eg: [20px + 3px]
-primaryExpression: literal #LiteralExpression| CAPITAL_IDENT #VariableReferenceExpression| BOX_BRACKET_OPEN expression BOX_BRACKET_CLOSE #ParenthesizedExpression;
+// Multiplication and Division, high precedence
+multiplicativeExpression:
+      multiplicativeExpression MUL primaryExpression  #MultiplyExpression
+      // Example: 10px * 2
+      // multiplication is evaluated before addition or subtraction.
+
+    | multiplicativeExpression DIV primaryExpression  #DivideExpression
+      // Example: 100px / 2
+      // division is evaluated before addition or subtraction.
+
+    | primaryExpression                                #PassthroughMultiplicativeExpression
+      // Example: 5px
+      // directly pass through a primary expression
+     ;
+
+
+// Primary expressions, highest precedence - literals, variables, parentheses
+primaryExpression:
+      BOX_BRACKET_OPEN expression BOX_BRACKET_CLOSE #ParenthesizedExpression
+      // Example: (10px + 5px) * 2 -> the addition inside parentheses happens first, and the result is multiplied by 2.
+
+    | literal #LiteralExpression
+      // Example: 10px, 20, #ff00ff -> literals are simple values evaluated directly.
+
+    | CAPITAL_IDENT #VariableReference
+      // Example: WidthVar
+      // refers to a variable, which is evaluated directly.
+    ;
 
 // A literal is just like a lil guy
 // eg: #ff00ff or 20px
@@ -126,8 +161,10 @@ literal:
     | PERCENTAGE #PercentageLiteral
     | SCALAR #ScalarLiteral // needs to come after PIXELSIZE and PERCENTAGE, otherwise they'd be passed over every time.
     | COLOR #ColorLiteral
-    | TRUE #BoolLiteralTrue
-    | FALSE #BoolLiteralFalse;
+    | boolLiteral #BooleanLiteral;
+
+// A boolean literal can be TRUE or FALSE
+boolLiteral: TRUE | FALSE;
 
 // An ifClause starts with an if [expression] followed by a block surrounded with curly braces, that block can contain declarations, variableAssignments or even a nested ifClause. at the end of the block it may contain an else clause.
 // eg:
